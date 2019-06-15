@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/styles.css"/>
+    <title>Backend Challenge</title>
+</head>
+<body>
+
+    <div class="container">
+        <nav class="navbar navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">Checkout</a>
+        </nav>
+        <br>
+
+        <button type="button" id="newCheckout" style="margin-top: 32px" class="btn btn-primary form-control">New Checkout</button>
+
+        <br>
+
+        <form class="basket">
+            <div class="form-row">
+                <div class="col">
+                    <label for="product">Product</label>
+                    <select class="form-control custom-select mr-sm-3" id="product">
+                        <option selected value="">Choose...</option>
+                        <option value="VOUCHER">Cabify Voucher</option>
+                        <option value="TSHIRT">Cabify T-Shirt</option>
+                        <option value="MUG">Cabify Coffee Mug</option>
+                    </select>
+                </div>
+
+                <div class="col">
+                    <label for="price">Price</label>
+                    <input class="form-control" type="text" id="price" placeholder="" readonly>
+                </div>
+
+                <div class="col">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" class="form-control text-center" id="quantity" value="1">
+                </div>
+
+                <div class="col">
+                    <button type="button" id="addProduct" style="margin-top: 32px" class="btn btn-primary form-control">Add Product</button>
+                </div>
+            </div>
+
+            <div class="row amount">
+                <h4 id="amount">Total: € 0.00</h4>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="http://code.jquery.com/jquery-3.4.0.min.js"
+            integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg="
+            crossorigin="anonymous"></script>
+    <script src="assets/checkout.js"></script>
+</body>
+</html>

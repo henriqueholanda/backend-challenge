@@ -1,3 +1,62 @@
+# Checkout basket
+
+Checkout basket is an application to manage checkout basket.
+
+## Getting started
+
+### Requirements
+
+To run this project you must have installed this following tools:
+
+* [Docker](https://docs.docker.com/engine/installation/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
+* [Git](https://git-scm.com/)
+
+### Running the project
+
+To run this project you just need to follow the steps bellow:
+
+1 - Clone project repository:
+```bash
+$ git clone https://github.com/henriqueholanda/backend-challenge.git
+```
+
+2 - Start the project
+```bash
+$ make start
+```
+> Note: This command may spend some time to complete, mainly when you run for the first
+time, because it will download all Docker images that project needs from [Docker Store](https://store.docker.com)
+and up two applications `backend` and `frontend`.
+
+3 - Access the application on your favorite browser
+```bash
+http://localhost:3000
+```
+
+### Stopping the project
+
+If you want to stop you just need to run the following command:
+```bash
+$ make stop
+```
+
+## Run tests
+
+To run test using `docker` you just need to run the following command:
+
+```bash
+$ make test
+```
+> Note: You must need to start project before it.
+
+
+## Author
+
+[Henrique Holanda](https://henriqueholanda.dev) 
+
+## The Challenge
+
 Besides providing exceptional transportation services, Cabify also runs a physical store which sells 3 products:
 
 ```

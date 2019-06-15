@@ -11,5 +11,15 @@ services:
     networks:
       - basket
 
+  frontend:
+    image: nginx:alpine
+    container_name: basket-frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend/:/usr/share/nginx/html
+    networks:
+      - basket
+
 networks:
   basket:
