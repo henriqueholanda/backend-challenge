@@ -30,7 +30,9 @@ func (ch *CheckoutHandlers) Create(context *gin.Context) {
 }
 
 func (ch *CheckoutHandlers) Delete(context *gin.Context) {
-	context.JSON(http.StatusNotImplemented, gin.H{"error": "Method not implemented"})
+	ch.storage.Delete(context.Param("id"))
+
+	response.NoContentResponse(context)
 }
 
 func (ch *CheckoutHandlers) FetchAmount(context *gin.Context) {

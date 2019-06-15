@@ -43,3 +43,27 @@ func TestBasketsCreateHandler(t *testing.T) {
 		t.Error("response id key not found")
 	}
 }
+
+func TestBasketsDeleteHandler(t *testing.T) {
+	req, err := http.NewRequest(http.MethodDelete, "/v1/checkout/basket/1", nil)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	rec := httptest.NewRecorder()
+
+	memoryStorage := storage.NewMemoryStorage()
+
+	checkoutHandlers := handlers.NewCheckoutHandlers(memoryStorage)
+
+	application.SetupRouter(checkoutHandlers).ServeHTTP(rec, req)
+
+	if status := rec.Code; status != http.StatusNoContent {
+		t.Errorf(
+			"handler returned invalid status code: got %v want %v",
+			status,
+			http.StatusNoContent,
+		)
+	}
+}
