@@ -3,16 +3,17 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/henriqueholanda/backend-challenge/backend/domain"
+	"github.com/henriqueholanda/backend-challenge/backend/domain/amount"
 	"github.com/henriqueholanda/backend-challenge/backend/handlers/response"
 	"github.com/henriqueholanda/backend-challenge/backend/infrastructure/repository"
 	"github.com/henriqueholanda/backend-challenge/backend/infrastructure/storage"
-	"net/http"
 	"strconv"
 )
 
 type CheckoutHandlers struct {
 	storage          storage.Storage
 	repository       *repository.Memory
+	amountCalculator amount.Calculator
 }
 
 type RequestParams struct {
@@ -23,10 +24,12 @@ type RequestParams struct {
 func NewCheckoutHandlers(
 	storage storage.Storage,
 	repository *repository.Memory,
+	calculator amount.Calculator,
 ) *CheckoutHandlers {
 	return &CheckoutHandlers{
 		storage:          storage,
 		repository:       repository,
+		amountCalculator: calculator,
 	}
 }
 
@@ -47,7 +50,18 @@ func (ch *CheckoutHandlers) Delete(context *gin.Context) {
 }
 
 func (ch *CheckoutHandlers) FetchAmount(context *gin.Context) {
-	context.JSON(http.StatusNotImplemented, gin.H{"error": "Method not implemented"})
+
+	basketStored, err := ch.storage.Fetch(context.Param("id"))
+	if err != nil {
+		response.NotFoundResponse(context, err.Error())
+		return
+	}
+
+	basket := basketStored.(*domain.Basket)
+
+	response.OkResponse(context, gin.H{
+		"amount": ch.amountCalculator.Calculate(basket),
+	})
 }
 
 func (ch *CheckoutHandlers) AddProduct(context *gin.Context) {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/henriqueholanda/backend-challenge/backend/application"
 	"github.com/henriqueholanda/backend-challenge/backend/domain"
+	"github.com/henriqueholanda/backend-challenge/backend/domain/amount"
 	"github.com/henriqueholanda/backend-challenge/backend/handlers"
 	"github.com/henriqueholanda/backend-challenge/backend/infrastructure/repository"
 	"github.com/henriqueholanda/backend-challenge/backend/infrastructure/storage"
@@ -36,8 +37,13 @@ func TestBasketsCreateHandler(t *testing.T) {
 
 	memoryStorage := storage.NewMemoryStorage()
 	productRepository := repository.NewProductRepository()
+	amountCalculator := amount.NewAmountCalculator(
+		amount.NewSum(),
+		amount.NewBuyTwoPayOnePromotion("VOUCHER"),
+		amount.NewBulkDiscount("TSHIRT", 3, 19.00),
+	)
 
-	checkoutHandlers := handlers.NewCheckoutHandlers(memoryStorage, productRepository)
+	checkoutHandlers := handlers.NewCheckoutHandlers(memoryStorage, productRepository, amountCalculator)
 
 	application.SetupRouter(checkoutHandlers).ServeHTTP(rec, req)
 
@@ -71,8 +77,13 @@ func TestBasketsDeleteHandler(t *testing.T) {
 
 	memoryStorage := storage.NewMemoryStorage()
 	productRepository := repository.NewProductRepository()
+	amountCalculator := amount.NewAmountCalculator(
+		amount.NewSum(),
+		amount.NewBuyTwoPayOnePromotion("VOUCHER"),
+		amount.NewBulkDiscount("TSHIRT", 3, 19.00),
+	)
 
-	checkoutHandlers := handlers.NewCheckoutHandlers(memoryStorage, productRepository)
+	checkoutHandlers := handlers.NewCheckoutHandlers(memoryStorage, productRepository, amountCalculator)
 
 	application.SetupRouter(checkoutHandlers).ServeHTTP(rec, req)
 
@@ -96,8 +107,13 @@ func TestBasketsAddItemHandlerWhenBasketNotFound(t *testing.T) {
 
 	memoryStorage := storage.NewMemoryStorage()
 	productRepository := repository.NewProductRepository()
+	amountCalculator := amount.NewAmountCalculator(
+		amount.NewSum(),
+		amount.NewBuyTwoPayOnePromotion("VOUCHER"),
+		amount.NewBulkDiscount("TSHIRT", 3, 19.00),
+	)
 
-	checkoutHandlers := handlers.NewCheckoutHandlers(memoryStorage, productRepository)
+	checkoutHandlers := handlers.NewCheckoutHandlers(memoryStorage, productRepository, amountCalculator)
 
 	application.SetupRouter(checkoutHandlers).ServeHTTP(rec, req)
 
@@ -127,6 +143,7 @@ func TestBasketsAddItemHanderWithInvalidRequest(t *testing.T) {
 	basketsHandler := handlers.NewCheckoutHandlers(
 		memoryStorage,
 		repository.NewProductRepository(),
+		amount.NewAmountCalculator(),
 	)
 
 	handler := application.SetupRouter(basketsHandler)
@@ -158,6 +175,7 @@ func TestBasketsAddItemHandlerWithInvalidProduct(t *testing.T) {
 	basketsHandler := handlers.NewCheckoutHandlers(
 		memoryStorage,
 		repository.NewProductRepository(),
+		amount.NewAmountCalculator(),
 	)
 
 	handler := application.SetupRouter(basketsHandler)
@@ -193,6 +211,7 @@ func TestBasketsAddItemHandler(t *testing.T) {
 	basketsHandler := handlers.NewCheckoutHandlers(
 		memoryStorage,
 		repository.NewProductRepository(),
+		amount.NewAmountCalculator(),
 	)
 
 	handler := application.SetupRouter(basketsHandler)
@@ -203,6 +222,90 @@ func TestBasketsAddItemHandler(t *testing.T) {
 			"handler returned invalid status code: got %v want %v",
 			status,
 			http.StatusCreated,
+		)
+	}
+}
+
+func TestBasketsAmountHandlerWhenBasketNotFound(t *testing.T) {
+	req, err := http.NewRequest(
+		http.MethodGet,
+		"/v1/checkout/basket/123/amount",
+		nil,
+	)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	rec := httptest.NewRecorder()
+
+	basketsHandler := handlers.NewCheckoutHandlers(
+		storage.NewMemoryStorage(),
+		repository.NewProductRepository(),
+		amount.NewAmountCalculator(),
+	)
+
+	handler := application.SetupRouter(basketsHandler)
+	handler.ServeHTTP(rec, req)
+
+	if status := rec.Code; status != http.StatusNotFound {
+		t.Errorf(
+			"handler returned invalid status code: got %v want %v",
+			status,
+			http.StatusNotFound,
+		)
+	}
+}
+
+func TestBasketsAmountHandler(t *testing.T) {
+	req, err := http.NewRequest(
+		http.MethodGet,
+		"/v1/checkout/basket/1/amount",
+		nil,
+	)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	rec := httptest.NewRecorder()
+
+	product := domain.Product{"MUG", "Cabify Coffee Mug", 7.50}
+	bkt := domain.NewBasket()
+	bkt.AddProduct(product)
+
+	store := &MemoryStorageMock{}
+	store.basket = bkt
+	basketsHandler := handlers.NewCheckoutHandlers(
+		store,
+		repository.NewProductRepository(),
+		amount.NewAmountCalculator(amount.NewSum()),
+	)
+
+	handler := application.SetupRouter(basketsHandler)
+	handler.ServeHTTP(rec, req)
+
+	if status := rec.Code; status != http.StatusOK {
+		t.Errorf(
+			"handler returned invalid status code: got %v want %v",
+			status,
+			http.StatusOK,
+		)
+	}
+
+	res := make(map[string]float64)
+
+	if err := json.NewDecoder(rec.Body).Decode(&res); err != nil {
+		t.Fail()
+	}
+
+	expectedAmount := 7.50
+
+	if res["amount"] != expectedAmount {
+		t.Errorf(
+			"wrong amount value: got %v want %v",
+			res["amount"],
+			expectedAmount,
 		)
 	}
 }
